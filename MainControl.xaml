@@ -1,0 +1,156 @@
+﻿<UserControl x:Class="FastMPI.MainControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VMS.TPS;assembly=VMS.TPS"
+             xmlns:local1="clr-namespace:VMS.TPS"
+             mc:Ignorable="d" MinHeight="200" MinWidth="230">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="b2v" />
+        <Style TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"  Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+
+
+                <GroupBox Width="125" Height="540">
+                    <GroupBox.Header>
+                        <TextBlock Text="Choose the index" Width="95" TextWrapping="Wrap"/>
+                    </GroupBox.Header>
+                    <StackPanel HorizontalAlignment="Left" Margin="0,16,0,0" VerticalAlignment="Top" Width="90" MinHeight="50" >
+                        <ListBox x:Name="lstInd" Margin="5" MinHeight="30" Width="80" MaxHeight="450">
+                            <RadioButton x:Name="buttonRPI" Content="RPI" Unchecked="RPIRadioButtonUnchecked" Checked="RPIRadioButtonChecked"/>
+                            <RadioButton x:Name="buttonCN" Content="CN" Unchecked="CNRadioButtonUnchecked" />
+                            <RadioButton x:Name="buttonGI" Content="GI" Unchecked="GIRadioButtonUnchecked" />
+                        </ListBox>
+                    </StackPanel>
+                </GroupBox>
+
+                <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="15" VerticalAlignment="Top" Width="7"/>
+
+                <GroupBox Width="190" Height="540">
+                    <GroupBox.Header>
+                        <TextBlock Text="Choose course and plan to analize" Width="130" TextWrapping="Wrap"/>
+                    </GroupBox.Header>
+                    <StackPanel HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="180" MinHeight="50">
+                        <ListBox x:Name="lstFields" Margin="5" MinHeight="30" Width="170" MaxHeight="450">
+                            <ListBox.ItemTemplate>
+                                <HierarchicalDataTemplate>
+                                    <CheckBox Content ="{Binding CoursePlanId}" IsChecked="{Binding IsCheckedPlan}" Checked="FieldsCheckBoxes_Checked" Unchecked="FieldsCheckBoxes_Unchecked"/>
+                                </HierarchicalDataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Margin="26,10,0,10" Height="42">
+                            <Button Content="Apply" Click="CNApplyClicked" Margin="100,10,10,0" RenderTransformOrigin="0.53,-0.455"
+                                    Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonCN}" />
+                            <Button Content="Apply" Click="GIApplyClicked" Margin="100,10,10,0" RenderTransformOrigin="0.53,-0.455"
+                                    Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonGI}" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="15" VerticalAlignment="Top" Width="7"/>
+
+                <!-- Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonRPI}" -->
+                <GroupBox Width="225" Height="540" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonRPI}"> 
+                    <GroupBox.Header>
+                        <TextBlock Text="Choose structures and indicate which should be considered as targets" Width="200" TextWrapping="Wrap" Height="34"/>
+                    </GroupBox.Header>
+                    <StackPanel Margin="0,0,0,-8">
+                        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" MinHeight="50" Width="210">
+                            <ListBox x:Name="lstStructures" Margin="5" MinHeight="30"  MaxHeight="450">
+                                <ListBox.ItemTemplate>
+                                    <HierarchicalDataTemplate>
+                                        <StackPanel HorizontalAlignment="Left" Height="18" VerticalAlignment="Top" Orientation="Horizontal">
+                                            <CheckBox x:Name="chbxStr" Content="{Binding Structure.Id}" IsChecked="{Binding IsCheckedStructure}" Width="140" Margin="0,0,0,0"/>
+                                            <CheckBox Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=chbxStr}" IsChecked="{Binding Target}" />
+                                            <TextBox Width="30" FontSize="10" >
+                                                <Binding Path="Weight" UpdateSourceTrigger="LostFocus" StringFormat="F2">
+                                                    <Binding.ValidationRules>
+                                                        <local1:MyValidationRule Min="0.00" Max="1.00"/>
+                                                    </Binding.ValidationRules>
+                                                </Binding>
+                                                <TextBox.Style>
+                                                    <Style>
+                                                        <Setter Property="Control.Visibility" Value="Hidden" />
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=IsChecked, ElementName=chbxStr}" Value="True" />
+                                                                    <Condition Binding="{Binding Path=IsChecked, ElementName=chbxChangeWeights}" Value="True" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Control.Visibility" Value="Visible" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                        <StackPanel Margin="26,0,0,10" Height="42">
+                            <CheckBox x:Name="chbxChangeWeights" Height="18" Margin="0,0,10,0" Content="Change structures weights" />
+                            <Button Content="Apply" Click="ApplyClicked" Margin="100,0,10,0" RenderTransformOrigin="0.53,-0.455"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="15" VerticalAlignment="Top" Width="7"/>
+
+                <GroupBox Height="540" Width="250">
+                    <GroupBox.Header>
+                        <TextBlock Text="Index results for chosen plans:" Width="180" TextWrapping="Wrap"/>
+                    </GroupBox.Header>
+                    <StackPanel HorizontalAlignment="Left" Margin="0,16,0,0" VerticalAlignment="Top" Width="240" MinHeight="50" >
+                        <ListBox x:Name="lstResults" Margin="5" MinHeight="30" MaxHeight="450">
+                            <ListBox.ItemTemplate>
+                                <HierarchicalDataTemplate>
+                                    <StackPanel Height="14" Orientation="Horizontal">
+                                        <!-- https://stackoverflow.com/questions/1582869/wpf-how-to-right-align-a-textblock-inside-a-horizontally-oriented-stackpanel -->
+                                        <DockPanel LastChildFill="False" Width="220">
+                                            <TextBlock DockPanel.Dock="Left" Text="{Binding CoursePlanId}"/>
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding IndexResult, StringFormat=F4}" />
+                                            <TextBlock DockPanel.Dock="Right" Text="  Result: "/>
+                                        </DockPanel>
+                                    </StackPanel>
+                                </HierarchicalDataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </GroupBox>
+
+
+            </StackPanel>
+            
+            <StackPanel VerticalAlignment="Bottom">
+                <Image HorizontalAlignment="Left" Width="680" Source="RPI_form_prod_weights_mod.jpg" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonRPI}" />
+                <Image HorizontalAlignment="Left" Width="240" Source="CN_formwrys.jpg" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonCN}" />
+                <Image HorizontalAlignment="Left" Width="240" Source="GI_formwrys.jpg" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonGI}" />
+                <!-- <Image HorizontalAlignment="Left" Width="680" Source="CN_formwrys.jpg" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonCN}" /> -->
+            </StackPanel>
+
+            <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="5" VerticalAlignment="Top" Width="5"/>
+            
+            <StackPanel VerticalAlignment="Bottom">
+                <TextBlock Text="The higher RPI index, the better plan characteristics" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonRPI}"/>
+                <TextBlock Text="The higher CN index, the better plan characteristics" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonCN}"/>
+                <TextBlock Text="The lower GI index, the better plan characteristics" Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=buttonGI}"/>
+            </StackPanel>
+        </StackPanel>
+
+    </Grid>
+
+
+</UserControl>
